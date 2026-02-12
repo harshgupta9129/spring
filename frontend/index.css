@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+.neo-shadow {
+    box-shadow: 10px 10px 20px #050505, -5px -5px 15px rgba(255, 255, 255, 0.02);
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
