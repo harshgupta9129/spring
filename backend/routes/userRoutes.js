@@ -1,8 +1,69 @@
 
 import express from 'express';
 import User from '../models/User.js';
+import SugarEvent from '../models/SugarEvent.js';
 
 const router = express.Router();
+
+// Get Leaderboard (Daily/Monthly)
+router.get('/leaderboard', async (req, res) => {
+    try {
+        const { timeframe } = req.query;
+        const now = new Date();
+        let startDate = new Date();
+
+        if (timeframe === 'monthly') {
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        } else {
+            // Default to Daily
+            startDate.setHours(0, 0, 0, 0);
+        }
+
+        const leaderboard = await SugarEvent.aggregate([
+            {
+                $match: {
+                    timestamp: { $gte: startDate }
+                }
+            },
+            {
+                $group: {
+                    _id: '$userId',
+                    totalXP: { $sum: '$pointsEarned' }
+                }
+            },
+            {
+                $sort: { totalXP: -1 }
+            },
+            {
+                $limit: 10
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $unwind: '$user'
+            },
+            {
+                $project: {
+                    _id: 1,
+                    username: '$user.username',
+                    name: '$user.name',
+                    avatar: '$user.avatar',
+                    xp: '$totalXP'
+                }
+            }
+        ]);
+
+        res.json(leaderboard);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 // Create a new user (Register)
 router.post('/', async (req, res) => {

@@ -25,6 +25,19 @@ router.post('/', async (req, res) => {
         const pointsMessages = [];
 
         const eventTime = new Date(timestamp || Date.now());
+        const startOfDay = new Date(eventTime);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        // 0. First Check-in of the Day Bonus
+        const existingEventsToday = await SugarEvent.countDocuments({
+            userId,
+            timestamp: { $gte: startOfDay, $lt: eventTime }
+        });
+
+        if (existingEventsToday === 0) {
+            pointsEarned += 5;
+            pointsMessages.push("First Check-in (+5 XP)");
+        }
 
         // 1. Time Bonus: Log before 6 PM (18:00)
         if (eventTime.getHours() < 18) {
@@ -63,6 +76,10 @@ router.post('/', async (req, res) => {
                 }
             }
         }
+
+        // Save points to the event itself
+        event.pointsEarned = pointsEarned;
+        await event.save();
 
         // --- Streak Logic ---
         const user = await User.findById(userId);
