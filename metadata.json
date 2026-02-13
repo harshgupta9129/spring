@@ -1,7 +1,0 @@
-{
-  "name": "Beat the Sugar Spike",
-  "description": "A high-performance, gamified sugar tracking app designed for Gen Z and Millennials, featuring AI-powered food analysis, a Bento-style dashboard, and juicy animations.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}
